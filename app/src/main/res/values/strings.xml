@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Mutual Auth</string>
+    <string name="title_activity_signer">SignerActivity</string>
+    <string name="title_activity_signee">SigneeActivity</string>
+    <string name="servicedesc">NFC service</string>
+    <string name="aiddescription">AID filter\n</string>
+</resources>
