@@ -1,10 +1,10 @@
-package com.example.mutualauth
+package com.example.mutualauth.Utility
 
+import android.content.Intent
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import com.example.mutualauth.Utils
 
 class MyHostApduService : HostApduService() {
 
@@ -26,6 +26,8 @@ class MyHostApduService : HostApduService() {
     }
 
     override fun onDeactivated(reason: Int) {
-        TODO("Not yet implemented")
+        val intent = Intent(this, MyHostApduService::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startService(intent);
     }
 }

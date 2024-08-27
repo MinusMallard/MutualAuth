@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.mutualauth.Utility.MyHostApduService
 import com.example.mutualauth.ui.theme.MutualAuthTheme
 
 class SigneeActivity : ComponentActivity() {

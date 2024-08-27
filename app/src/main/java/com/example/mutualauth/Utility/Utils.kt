@@ -1,5 +1,6 @@
-package com.example.mutualauth
+package com.example.mutualauth.Utility
 
+import java.security.cert.X509Certificate
 import java.util.Arrays
 
 object Utils {
@@ -9,7 +10,8 @@ object Utils {
     val SELECT_APD : ByteArray = byteArrayOf(
         0x00.toByte(),0xA4.toByte(),0x04.toByte(),0x00.toByte(),
         0x06.toByte(),0xF0.toByte(),0x01.toByte(),0x02.toByte(),
-        0x03.toByte(),0x04.toByte(),0x05.toByte())
+        0x03.toByte(),0x04.toByte(),0x05.toByte()
+    )
 
     // "OK" status word sent in response to SELECT AID command (0x9000)
     val SELECT_OK_SW : ByteArray = byteArrayOf(0x90.toByte(), 0x00.toByte())
@@ -70,5 +72,10 @@ object Utils {
             offset += array.size
         }
         return result
+    }
+
+    fun x509ToByteArray(cert: X509Certificate): ByteArray {
+        // Get the DER-encoded form of the certificate
+        return cert.encoded
     }
 }
