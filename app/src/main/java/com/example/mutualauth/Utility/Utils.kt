@@ -1,7 +1,10 @@
 package com.example.mutualauth.Utility
 
+import java.io.ByteArrayInputStream
+import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.Arrays
+
 
 object Utils {
 
@@ -17,6 +20,7 @@ object Utils {
     val SELECT_OK_SW : ByteArray = byteArrayOf(0x90.toByte(), 0x00.toByte())
 
     val REQUEST_CERTIFICATE: ByteArray = byteArrayOf(0x34.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
+    val FINAL_CERTIFICATE: ByteArray = byteArrayOf(0x36.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
 
     fun byteArrayToHexString(bytes: ByteArray): String {
         val hexArray = charArrayOf(
@@ -77,5 +81,40 @@ object Utils {
     fun x509ToByteArray(cert: X509Certificate): ByteArray {
         // Get the DER-encoded form of the certificate
         return cert.encoded
+    }
+
+    fun createApduPackets(byteArray: ByteArray, packetSize: Int): List<ByteArray> {
+        val apduPackets = mutableListOf<ByteArray>()
+
+        // Calculate the number of packets needed.
+        val numPackets = (byteArray.size + packetSize - 1) / packetSize
+
+        for (i in 0 until numPackets) {
+            val startIdx = i * packetSize
+            val endIdx = minOf(startIdx + packetSize, byteArray.size)
+            val packetData = byteArray.sliceArray(startIdx until endIdx)
+
+            // Construct your APDU command here.
+            // For example, assuming CLA=0x00, INS=0x01, P1=0x00, P2=0x00:
+            val apduHeader = byteArrayOf(0x34.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
+            val apduCommand = apduHeader + packetData
+
+            apduPackets.add(apduCommand)
+        }
+
+        return apduPackets
+    }
+
+    fun byteArrayToX509Certificate(byteArray: ByteArray): X509Certificate? {
+        try {
+            val certificateFactory = CertificateFactory.getInstance("X.509")
+            val inputStream = ByteArrayInputStream(byteArray)
+            return certificateFactory.generateCertificate(inputStream) as X509Certificate
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Handle any exceptions (e.g., CertificateParsingException)
+            // Return null or throw an appropriate error based on your use case.
+            return null
+        }
     }
 }

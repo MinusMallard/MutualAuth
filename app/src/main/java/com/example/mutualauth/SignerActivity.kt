@@ -9,19 +9,30 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.key
+import com.example.mutualauth.Utility.KeyGeneratorUtility
+import com.example.mutualauth.Utility.Paired
+import com.example.mutualauth.Utility.TestKeyPair
 import com.example.mutualauth.Utility.Utils
 import com.example.mutualauth.ui.theme.MutualAuthTheme
+import java.util.Arrays
 
 class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
+
+    // instance of KeyGenerator class
+    private val keyGeneratorUtility = KeyGeneratorUtility()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         NfcAdapter.getDefaultAdapter(this).enableReaderMode(
             this,
             this,
             NfcAdapter.FLAG_READER_NFC_A ,
             null
         )
+
         setContent {
             MutualAuthTheme {
 //                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -38,18 +49,53 @@ class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
         Log.d("signerActivity", "Tag discovered")
         if(isoDep != null) {
             try {
+                // attempting connection
                 isoDep.connect()
+
+                // sending SELECT AID command
                 var commandApdu : ByteArray = Utils.SELECT_APD
+
+                // first result with ok_sw
+                //-----------------STEP-1---------------------
                 var result = isoDep.transceive(commandApdu)
-                Log.d("result", result.toHexString())
+                //--------------------------------------------
+
+                //Log.d("result", result.toHexString())
+
+                // receiving result and checking for ok_sw
                 if (result[0] == Utils.SELECT_OK_SW[0] && result[1] == Utils.SELECT_OK_SW[1]){
-                    Log.d("success", "connected")
+
+                    // getting certificate from the keyGeneratorUtility class and converting it to ByteArray
+                    val certByteArray = Utils.x509ToByteArray(keyGeneratorUtility.certificate)
+
+                    // generating packets of the certificate
+                    val packets = Utils.createApduPackets(certByteArray, 256)
+                    Log.d("packets", packets.toString())
+                    // from here on sending packets to the signee
+                    result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[0]))
+
+                    if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                        result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[1]))
+                        if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                            result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[2]))
+                            if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                                result = isoDep.transceive(Utils.FINAL_CERTIFICATE)
+                                if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                                    runOnUiThread {
+                                        Toast.makeText(this, "certificate sent", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 runOnUiThread {
                     Toast.makeText(this, "connected", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+            } finally {
+                isoDep.close()
             }
         }
     }
