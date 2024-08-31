@@ -12,7 +12,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.key
 import com.example.mutualauth.Utility.KeyGeneratorUtility
 import com.example.mutualauth.Utility.Paired
-import com.example.mutualauth.Utility.TestKeyPair
 import com.example.mutualauth.Utility.Utils
 import com.example.mutualauth.ui.theme.MutualAuthTheme
 import java.util.Arrays
@@ -66,10 +65,10 @@ class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
                 if (result[0] == Utils.SELECT_OK_SW[0] && result[1] == Utils.SELECT_OK_SW[1]){
 
                     // getting certificate from the keyGeneratorUtility class and converting it to ByteArray
-                    val certByteArray = Utils.x509ToByteArray(keyGeneratorUtility.certificate)
+                    val certByteArray = Utils.x509ToByteArray(keyGeneratorUtility.certificate)!!
 
                     // generating packets of the certificate
-                    val packets = Utils.createApduPackets(certByteArray, 256)
+                    val packets = Utils.createApduPackets(certByteArray, 255)
                     Log.d("packets", packets.toString())
                     // from here on sending packets to the signee
                     result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[0]))

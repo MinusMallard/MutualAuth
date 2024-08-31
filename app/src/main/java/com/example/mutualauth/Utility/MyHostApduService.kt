@@ -27,7 +27,7 @@ class MyHostApduService : HostApduService() {
 
             }else if (commandApdu.copyOfRange(0, Utils.REQUEST_CERTIFICATE.size).contentEquals(Utils.REQUEST_CERTIFICATE)){
                 // adding all the packets received in a single array
-                Paired.recievedPackets += commandApdu.copyOfRange(Utils.REQUEST_CERTIFICATE.size, commandApdu.size)
+                Paired.recievedPackets = Utils.concatArrays(Paired.recievedPackets, commandApdu.copyOfRange(Utils.REQUEST_CERTIFICATE.size, commandApdu.size))
                 Log.d("HostApduService",Paired.recievedPackets.toString())
                 return Utils.SELECT_OK_SW
             }else if (commandApdu.copyOfRange(0, Utils.FINAL_CERTIFICATE.size).contentEquals(Utils.FINAL_CERTIFICATE)) {

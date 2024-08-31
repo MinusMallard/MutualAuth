@@ -21,7 +21,7 @@ object Paired {
 
     fun generateCertificate() {
         if (certificate == null) {
-            certificate = Utils.byteArrayToX509Certificate(recievedPackets)
+            certificate = KeyGeneratorUtility.byteArrayToX509Certificate(recievedPackets)
             publicKey = certificate?.publicKey
         }
     }

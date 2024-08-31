@@ -104,17 +104,4 @@ object Utils {
 
         return apduPackets
     }
-
-    fun byteArrayToX509Certificate(byteArray: ByteArray): X509Certificate? {
-        try {
-            val certificateFactory = CertificateFactory.getInstance("X.509")
-            val inputStream = ByteArrayInputStream(byteArray)
-            return certificateFactory.generateCertificate(inputStream) as X509Certificate
-        } catch (e: Exception) {
-            e.printStackTrace()
-            // Handle any exceptions (e.g., CertificateParsingException)
-            // Return null or throw an appropriate error based on your use case.
-            return null
-        }
-    }
 }

@@ -22,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -75,16 +76,8 @@ public class KeyGeneratorUtility {
     // Generate RSA Key Pair using Bouncy Castle
     public KeyPair generateKeyRSAPair(String alias) throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(
-                KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-
-        keyPairGenerator.initialize(new KeyGenParameterSpec.Builder(
-                alias,
-                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
-                .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
-                .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
-                .build());
-
+                KeyProperties.KEY_ALGORITHM_RSA);
+        keyPairGenerator.initialize(2048, new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 
@@ -103,7 +96,24 @@ public class KeyGeneratorUtility {
         X509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(
                 dnName, serialNumber, startDate, endDate, dnName, keyPair.getPublic());
 
-        return new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner));
+        X509Certificate certificate = new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner));
+
+        if (certificate != null) {
+            return certificate;
+        } else {
+            throw new Exception("Failed to generate self-signed certificate");
+        }
+    }
+
+    public static X509Certificate byteArrayToX509Certificate(byte[] byteArray) {
+
+        try {
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
+            return (X509Certificate) certificateFactory.generateCertificate(inputStream);
+        } catch (CertificateException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // Generate AES Key using Bouncy Castle
