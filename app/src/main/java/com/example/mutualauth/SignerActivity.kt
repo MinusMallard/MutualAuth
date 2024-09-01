@@ -71,12 +71,12 @@ class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
                     val packets = Utils.createApduPackets(certByteArray, 255)
                     Log.d("packets", packets.toString())
                     // from here on sending packets to the signee
-                    result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[0]))
+                    result = isoDep.transceive(packets[0])
 
                     if (result.contentEquals(Utils.SELECT_OK_SW)) {
-                        result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[1]))
+                        result = isoDep.transceive(packets[1])
                         if (result.contentEquals(Utils.SELECT_OK_SW)) {
-                            result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[2]))
+                            result = isoDep.transceive(packets[2])
                             if (result.contentEquals(Utils.SELECT_OK_SW)) {
                                 result = isoDep.transceive(Utils.FINAL_CERTIFICATE)
                                 if (result.contentEquals(Utils.SELECT_OK_SW)) {

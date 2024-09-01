@@ -22,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -114,6 +115,10 @@ public class KeyGeneratorUtility {
         } catch (CertificateException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public  static byte[] x509ToByteArray(X509Certificate cert) throws CertificateEncodingException {
+        return cert.getEncoded();
     }
 
     // Generate AES Key using Bouncy Castle
