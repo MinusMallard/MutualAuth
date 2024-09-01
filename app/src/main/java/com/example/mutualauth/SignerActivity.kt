@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.key
+import androidx.compose.ui.input.key.Key
 import com.example.mutualauth.Utility.KeyGeneratorUtility
 import com.example.mutualauth.Utility.Paired
 import com.example.mutualauth.Utility.Utils
@@ -66,18 +67,25 @@ class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
 
                     // getting certificate from the keyGeneratorUtility class and converting it to ByteArray
                     val certByteArray = Utils.x509ToByteArray(keyGeneratorUtility.certificate)!!
+                    val obj : KeyGeneratorUtility = KeyGeneratorUtility()
+                    Log.d("cert to send in Byte array",certByteArray.toString())
+                    Log.d("pub key in certificate", obj.certificate.publicKey.toString())
+                    Log.d("Signer Cert Size", certByteArray.size.toString())
 
                     // generating packets of the certificate
                     val packets = Utils.createApduPackets(certByteArray, 255)
-                    Log.d("packets", packets.toString())
+                    Log.d("packets 0", packets[0].toString())
                     // from here on sending packets to the signee
                     result = isoDep.transceive(packets[0])
 
                     if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                        Log.d("packet 1", packets[1].toString())
                         result = isoDep.transceive(packets[1])
                         if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                            Log.d("packet 2", packets[2].toString())
                             result = isoDep.transceive(packets[2])
                             if (result.contentEquals(Utils.SELECT_OK_SW)) {
+                                //Log.d("packet 3", packets[3].toString())
                                 result = isoDep.transceive(Utils.FINAL_CERTIFICATE)
                                 if (result.contentEquals(Utils.SELECT_OK_SW)) {
                                     runOnUiThread {

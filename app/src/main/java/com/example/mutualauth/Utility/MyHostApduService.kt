@@ -38,6 +38,8 @@ class MyHostApduService : HostApduService() {
                     )
                 }
                 Paired.generateCertificate()
+                Log.d("Received. Cert Size",Paired.recievedPackets.size.toString())
+                Log.d("Received. Cert in Byte array",Paired.recievedPackets.toString())
                 Log.d("certificate", Paired.getCertificate().toString())
                 Log.d("public Key", Paired.getPublicKey().toString())
                 return Utils.SELECT_OK_SW
