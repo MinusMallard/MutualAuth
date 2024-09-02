@@ -25,4 +25,10 @@ object Paired {
             publicKey = certificate?.publicKey
         }
     }
+
+    fun generatePublicKey() {
+        if (publicKey == null) {
+            publicKey = certificate?.publicKey
+        }
+    }
 }

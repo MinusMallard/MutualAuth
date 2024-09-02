@@ -5,8 +5,6 @@ import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import java.security.KeyPair
-import java.util.Arrays
 
 class MyHostApduService : HostApduService() {
 
@@ -14,8 +12,8 @@ class MyHostApduService : HostApduService() {
     private var packetsSend: List<ByteArray> = listOf()
     private var packetIndex = 0
 
-    override fun processCommandApdu(commandApdu: ByteArray, extras: Bundle?): ByteArray {
 
+    override fun processCommandApdu(commandApdu: ByteArray, extras: Bundle?): ByteArray {
         try {
             if(commandApdu.contentEquals(Utils.SELECT_APD)){
                 // returning response apdu , total data that can be sent is 260 bytes
@@ -34,12 +32,17 @@ class MyHostApduService : HostApduService() {
                 if (packetsSend.isEmpty()) {
                     packetsSend = Utils.createApduPackets(
                         Utils.x509ToByteArray(keyGeneratorUtility.certificate),
-                        256
+                        254
                     )
+                    Paired.generateCertificate()
+                    Paired.generatePublicKey()
+                    Log.d("certificate", Paired.getCertificate().toString())
+                    Log.d("public Key", Paired.getPublicKey().toString())
                 }
-                Paired.generateCertificate()
-                Log.d("certificate", Paired.getCertificate().toString())
-                Log.d("public Key", Paired.getPublicKey().toString())
+
+
+                return packetsSend[packetIndex++]
+            } else if (commandApdu.contentEquals(Utils.RANDOM_EXC)) {
                 return Utils.SELECT_OK_SW
             }
         } catch (e: Exception) {
@@ -51,6 +54,7 @@ class MyHostApduService : HostApduService() {
     }
 
     override fun onDeactivated(reason: Int) {
+        packetIndex = 0
         val intent = Intent(this, MyHostApduService::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startService(intent);

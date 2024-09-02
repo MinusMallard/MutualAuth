@@ -9,12 +9,10 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.key
 import com.example.mutualauth.Utility.KeyGeneratorUtility
 import com.example.mutualauth.Utility.Paired
 import com.example.mutualauth.Utility.Utils
 import com.example.mutualauth.ui.theme.MutualAuthTheme
-import java.util.Arrays
 
 class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
 
@@ -71,25 +69,31 @@ class SignerActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
                     val packets = Utils.createApduPackets(certByteArray, 255)
                     Log.d("packets", packets.toString())
                     // from here on sending packets to the signee
-                    result = isoDep.transceive(packets[0])
+                    isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[0]))
+                    isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[1]))
+                    result = isoDep.transceive(Utils.concatArrays(Utils.REQUEST_CERTIFICATE, packets[2]))
 
                     if (result.contentEquals(Utils.SELECT_OK_SW)) {
-                        result = isoDep.transceive(packets[1])
+                        runOnUiThread {
+                            Toast.makeText(this, "certificate sent", Toast.LENGTH_SHORT).show()
+                        }
+
+                        val result1 = isoDep.transceive(Utils.FINAL_CERTIFICATE)
+                        Paired.recievedPackets += result1.copyOfRange(0, result1.size)
+                        val result2 = isoDep.transceive(Utils.FINAL_CERTIFICATE)
+                        Paired.recievedPackets += result2.copyOfRange(0, result2.size)
+                        val result3 = isoDep.transceive(Utils.FINAL_CERTIFICATE)
+                        Paired.recievedPackets += result3.copyOfRange(0, result3.size)
+                        Paired.generateCertificate()
+                        Log.d("certificate", Paired.getCertificate().toString())
+                        Log.d("publicKey", Paired.getPublicKey().toString())
+                        result = isoDep.transceive(Utils.RANDOM_EXC)
                         if (result.contentEquals(Utils.SELECT_OK_SW)) {
-                            result = isoDep.transceive(packets[2])
-                            if (result.contentEquals(Utils.SELECT_OK_SW)) {
-                                result = isoDep.transceive(Utils.FINAL_CERTIFICATE)
-                                if (result.contentEquals(Utils.SELECT_OK_SW)) {
-                                    runOnUiThread {
-                                        Toast.makeText(this, "certificate sent", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                            runOnUiThread {
+                                Toast.makeText(this, "random number sent", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
-                }
-                runOnUiThread {
-                    Toast.makeText(this, "connected", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

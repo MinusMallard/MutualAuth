@@ -1,7 +1,5 @@
 package com.example.mutualauth.Utility
 
-import java.io.ByteArrayInputStream
-import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.Arrays
 
@@ -21,6 +19,7 @@ object Utils {
 
     val REQUEST_CERTIFICATE: ByteArray = byteArrayOf(0x34.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
     val FINAL_CERTIFICATE: ByteArray = byteArrayOf(0x36.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
+    val RANDOM_EXC: ByteArray = byteArrayOf(0x37.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
 
     fun byteArrayToHexString(bytes: ByteArray): String {
         val hexArray = charArrayOf(
@@ -96,8 +95,8 @@ object Utils {
 
             // Construct your APDU command here.
             // For example, assuming CLA=0x00, INS=0x01, P1=0x00, P2=0x00:
-            val apduHeader = byteArrayOf(0x34.toByte(), 0x00.toByte(), 0x00.toByte(), 0x00.toByte())
-            val apduCommand = apduHeader + packetData
+
+            val apduCommand =  packetData
 
             apduPackets.add(apduCommand)
         }
